@@ -54,9 +54,12 @@ class CrystalGraphConvNet(nn.Module):
         self.classification = classification
 
         self.embedding = nn.Linear(orig_atom_fea_len, atom_fea_len)
-        self.convs = nn.ModuleList([CGConv(atom_fea_len=atom_fea_len,
-                                    nbr_fea_len=nbr_fea_len)
-                                    for _ in range(n_conv)])
+
+        self.n_conv = n_conv
+        self.conv = CGConv(atom_fea_len=atom_fea_len, nbr_fea_len=nbr_fea_len)
+        # self.convs = nn.ModuleList([CGConv(atom_fea_len=atom_fea_len,
+        #                             nbr_fea_len=nbr_fea_len)
+        #                             for _ in range(n_conv)])
               
         self.conv_to_fc_softplus = nn.Softplus()
         self.conv_to_fc = nn.Linear(atom_fea_len*2, h_fea_len)
@@ -79,8 +82,11 @@ class CrystalGraphConvNet(nn.Module):
         atom_fea, bond_index, bond_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
         atom_fea = self.embedding(atom_fea)
 
-        for i, conv_func in enumerate(self.convs):
-            atom_fea = conv_func(x=atom_fea, edge_index=bond_index, edge_attr=bond_attr)
+        for _ in range(self.n_conv):
+            atom_fea = self.conv(x=atom_fea, edge_index=bond_index, edge_attr=bond_attr)
+
+        # for i, conv_func in enumerate(self.convs):
+        #     atom_fea = conv_func(x=atom_fea, edge_index=bond_index, edge_attr=bond_attr)
 
         # MEAN cat MAX POOL
         crys_fea = torch.cat([gap(atom_fea, batch), gmp(atom_fea, batch)], dim=1)
