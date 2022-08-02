@@ -16,7 +16,7 @@ from torch.utils.data import Dataset
 from torch_geometric.data import DataLoader, Data
 from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import SubsetRandomSampler
-from matminer.datasets import load_dataset
+# from matminer.datasets import load_dataset
 from xenonpy.datatools import preset
 from tqdm import trange
 from statistics import mean, stdev
